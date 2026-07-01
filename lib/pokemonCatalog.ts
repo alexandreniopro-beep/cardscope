@@ -16,10 +16,19 @@ export async function lookupCatalog(
   series?: string,
   number?: string
 ): Promise<CatalogMatch | null> {
-  const printedNumber = number?.split("/")[0]?.trim()
-  if (printedNumber) {
-    const numberMatch = await queryCatalog(`name:"${name}" number:${printedNumber}`)
+  const [printedNumber, printedTotal] = (number?.split("/") ?? []).map((s) =>
+    s?.trim()
+  )
+  if (printedNumber && printedTotal) {
+    const numberMatch = await queryCatalog(
+      `name:"${name}" number:${printedNumber} set.printedTotal:${printedTotal}`
+    )
     if (numberMatch) return { ...numberMatch, seriesConfirmed: true }
+  }
+
+  if (printedNumber && !printedTotal) {
+    const looseMatch = await queryCatalog(`name:"${name}" number:${printedNumber}`)
+    if (looseMatch) return { ...looseMatch, seriesConfirmed: true }
   }
 
   if (series) {
