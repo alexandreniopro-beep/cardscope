@@ -1,4 +1,6 @@
-import { getRealPrice } from "./pricing/realPrice"
+﻿import { getRealPrice } from "./pricing/realPrice"
+import { identifyCard } from "./ai/identifyCard"
+import { lookupCatalog } from "./pokemonCatalog"
 
 export type ScanResult = {
   name: string
@@ -20,32 +22,34 @@ export type ScanResult = {
   confidence: number
 }
 
-// 🧠 MOCK reconnaissance d'image (à remplacer par un vrai modèle de
-// vision plus tard — voir TensorFlow.js dans le README). Le prix, lui,
-// est déjà réel (scraping + cache via lib/pricing/realPrice.ts).
-export async function analyzeCard(_imageBase64: string): Promise<ScanResult> {
-  await new Promise((r) => setTimeout(r, 600))
+const CONDITION_ESTIMATE = {
+  conditionScore: 88,
+  conditionLabel: "Near Mint" as const,
+  psaProbability: { psa10: 55, psa9: 85, psa8: 96 }
+}
 
-  const name = "Dracaufeu ex"
+export async function analyzeCard(imageBase64: string): Promise<ScanResult> {
+  const identified = await identifyCard(imageBase64)
+
+  const catalogMatch = await lookupCatalog(identified.name)
+
+  const name = catalogMatch?.name || identified.name
+  const series = catalogMatch?.series || identified.series
+  const rarity = catalogMatch?.rarity || identified.rarity
+  const number = catalogMatch?.number || identified.number
+
   const price = await getRealPrice(name)
 
   return {
     name,
-    series: "Évolutions Prismatiques",
-    rarity: "Ultra Rare",
-    number: "203/197",
-    language: "FR",
+    series,
+    rarity,
+    number,
+    language: identified.language,
 
-    conditionScore: 92,
-    conditionLabel: "Near Mint",
-
-    psaProbability: {
-      psa10: 62,
-      psa9: 91,
-      psa8: 98
-    },
+    ...CONDITION_ESTIMATE,
 
     estimatedPrice: price,
-    confidence: 88
+    confidence: identified.confidence
   }
 }
