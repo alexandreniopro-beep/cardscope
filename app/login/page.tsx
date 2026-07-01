@@ -39,6 +39,27 @@ export default function LoginPage() {
     setStatus(error ? error.message : "Compte cree. Tu peux maintenant te connecter.")
   }
 
+  async function forgotPassword() {
+    if (!email) {
+      setStatus("Renseigne ton email ci-dessus, puis clique a nouveau sur ce lien.")
+      return
+    }
+
+    setLoading(true)
+    setStatus(null)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    })
+
+    setLoading(false)
+    setStatus(
+      error
+        ? error.message
+        : "Un email de reinitialisation a ete envoye. Verifie ta boite mail."
+    )
+  }
+
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <h1 className="text-2xl font-bold">Connexion CardScope</h1>
@@ -79,6 +100,14 @@ export default function LoginPage() {
           Creer un compte
         </button>
       </div>
+
+      <button
+        onClick={forgotPassword}
+        disabled={loading}
+        className="mt-4 text-sm text-blue-400 underline block"
+      >
+        Mot de passe oublie ?
+      </button>
 
       {status && <p className="mt-3 text-sm text-gray-400">{status}</p>}
     </div>
