@@ -8,6 +8,7 @@ export type ScanResult = {
   rarity: string
   number?: string
   edition: string
+  finish: string
   language: string
 
   conditionScore: number
@@ -54,6 +55,7 @@ export async function analyzeCard(imageBase64: string): Promise<ScanResult> {
     rarity,
     number,
     edition: identified.edition,
+    finish: identified.finish,
     language: identified.language,
 
     ...CONDITION_ESTIMATE,

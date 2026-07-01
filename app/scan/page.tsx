@@ -61,6 +61,7 @@ export default function ScanPage() {
           <p>Serie : {result.series}</p>
           <p>Numero : {result.number || "non lu"}</p>
           <p>Edition : {result.edition}</p>
+          <p>Finition : {result.finish}</p>
           <p>Rarete : {result.rarity}</p>
           <p>Langue : {result.language}</p>
 
