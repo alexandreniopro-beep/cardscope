@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import CameraScanner from "@/components/CameraScanner"
@@ -23,7 +23,7 @@ export default function ScanPage() {
         body: JSON.stringify({ image })
       })
 
-      if (!res.ok) throw new Error("Échec de l'analyse")
+      if (!res.ok) throw new Error("Echec de l'analyse")
 
       const data: ScanResult = await res.json()
       setResult(data)
@@ -52,33 +52,43 @@ export default function ScanPage() {
 
       <CameraScanner onCapture={handleCapture} />
 
-      {loading && <p className="mt-4 text-blue-400">🧠 Analyse en cours...</p>}
+      {loading && <p className="mt-4 text-blue-400">Analyse en cours...</p>}
       {error && <p className="mt-4 text-red-400">{error}</p>}
 
       {result && !loading && (
         <div className="mt-6 bg-gray-900 p-4 rounded-xl space-y-2">
           <p className="text-lg font-bold">{result.name}</p>
-          <p>📦 Série : {result.series}</p>
-          <p>⭐ Rareté : {result.rarity}</p>
-          <p>🌍 Langue : {result.language}</p>
+          <p>Serie : {result.series}</p>
+          <p>Numero : {result.number || "non lu"}</p>
+          <p>Edition : {result.edition}</p>
+          <p>Rarete : {result.rarity}</p>
+          <p>Langue : {result.language}</p>
 
           <hr className="border-gray-700 my-2" />
 
-          <p>📊 État : {result.conditionLabel} ({result.conditionScore}/100)</p>
-          <p>🏆 PSA 10 : {result.psaProbability.psa10}%</p>
-          <p>🏆 PSA 9 : {result.psaProbability.psa9}%</p>
-          <p>🏆 PSA 8 : {result.psaProbability.psa8}%</p>
+          <p>Etat : {result.conditionLabel} ({result.conditionScore}/100)</p>
+          <p>PSA 10 : {result.psaProbability.psa10}%</p>
+          <p>PSA 9 : {result.psaProbability.psa9}%</p>
+          <p>PSA 8 : {result.psaProbability.psa8}%</p>
 
           <hr className="border-gray-700 my-2" />
 
           <p className="text-green-400 text-lg">
-            💰 Valeur estimée : {result.estimatedPrice} €
+            Valeur estimee : {result.estimatedPrice} EUR
           </p>
-          <p className="text-gray-400 text-sm">🎯 Confiance IA : {result.confidence}%</p>
+          <p className="text-gray-400 text-sm">Confiance IA : {result.confidence}%</p>
+
+          <details className="text-xs text-gray-500 mt-2">
+            <summary className="cursor-pointer">Debug (lecture brute de l'IA)</summary>
+            <p>Serie lue par l'IA : {result.debug.aiSeries}</p>
+            <p>Numero lu par l'IA : {result.debug.aiNumber || "non lu"}</p>
+            <p>Edition lue par l'IA : {result.debug.aiEdition}</p>
+            <p>Confirme par la base pokemontcg.io : {result.debug.catalogConfirmed ? "oui" : "non"}</p>
+          </details>
 
           {saved && (
             <p className="text-xs text-gray-500 mt-2">
-              Ajoutée à la collection ({saved === "cloud" ? "compte connecté" : "stockage local — connecte-toi pour la sauvegarder dans le cloud"})
+              Ajoutee a la collection ({saved === "cloud" ? "compte connecte" : "stockage local"})
             </p>
           )}
         </div>

@@ -7,6 +7,7 @@ export type ScanResult = {
   series: string
   rarity: string
   number?: string
+  edition: string
   language: string
 
   conditionScore: number
@@ -20,6 +21,13 @@ export type ScanResult = {
 
   estimatedPrice: number
   confidence: number
+
+  debug: {
+    aiSeries: string
+    aiNumber: string
+    aiEdition: string
+    catalogConfirmed: boolean
+  }
 }
 
 const CONDITION_ESTIMATE = {
@@ -31,12 +39,12 @@ const CONDITION_ESTIMATE = {
 export async function analyzeCard(imageBase64: string): Promise<ScanResult> {
   const identified = await identifyCard(imageBase64)
 
-  const catalogMatch = await lookupCatalog(identified.name)
+  const catalogMatch = await lookupCatalog(identified.name, identified.series, identified.number)
 
   const name = catalogMatch?.name || identified.name
-  const series = catalogMatch?.series || identified.series
-  const rarity = catalogMatch?.rarity || identified.rarity
-  const number = catalogMatch?.number || identified.number
+  const series = catalogMatch?.seriesConfirmed ? catalogMatch.series : identified.series
+  const rarity = catalogMatch?.seriesConfirmed ? catalogMatch.rarity : identified.rarity
+  const number = catalogMatch?.seriesConfirmed ? catalogMatch.number : identified.number
 
   const price = await getRealPrice(name)
 
@@ -45,11 +53,19 @@ export async function analyzeCard(imageBase64: string): Promise<ScanResult> {
     series,
     rarity,
     number,
+    edition: identified.edition,
     language: identified.language,
 
     ...CONDITION_ESTIMATE,
 
     estimatedPrice: price,
-    confidence: identified.confidence
+    confidence: identified.confidence,
+
+    debug: {
+      aiSeries: identified.series,
+      aiNumber: identified.number,
+      aiEdition: identified.edition,
+      catalogConfirmed: catalogMatch?.seriesConfirmed ?? false
+    }
   }
 }
